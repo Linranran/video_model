@@ -39,19 +39,3 @@ cap.release()
 out.release()
 cv2.destroyAllWindows()
 
-
-# vc = cv2.VideoCapture('/data/962a/封神榜01_3.mp4')  # 读入视频文件，命名cv
-# n = 1  # 计数
-#
-# if vc.isOpened():  # 判断是否正常打开
-#     rval, frame = vc.read()
-# else:
-#     rval = False
-#
-#
-# i = 0
-# for i in range(100):  # 循环读取视频帧
-#     rval, frame = vc.read()
-#     cv2.imwrite('framesplit/{}.jpg'.format(i), frame)  # 存储为图像
-#     cv2.waitKey(1)
-# vc.release()

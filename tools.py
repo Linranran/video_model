@@ -55,47 +55,95 @@ def sample_hist(img,number):
 #     hists.append(list((img[i + 1].flat[j]) for j in mask))
 #     return  hists
 
-
 def sample_refresh_hist(img,number):
     hists = []
     simi=[]
-    mask = random.sample(range(1, img[1].shape[0]*img[1].shape[1]), number)
+    mask=random_2d_sample(img[1].shape[0],img[1].shape[1],number)
     for i in range(len(img)-1):
-        # mask = random.sample(range(1, img[1].shape[0] * img[1].shape[1]), number)
-        sample_img=list((img[i].flat[j]) for j in mask)
-        similar=pix_difference(list((img[i].flat[j]) for j in mask),list((img[i+1].flat[j]) for j in mask))
-        simis=difference(list((img[i].flat[j]) for j in mask),list((img[i+1].flat[j]) for j in mask))
-        if i%3==0:
+        sample_img=list((img[i][j[0]][j[1]]) for j in mask)
+        similar=pix_difference(list((img[i][j[0]][j[1]]) for j in mask),list((img[i+1][j[0]][j[1]]) for j in mask))
+        simis=difference(list((img[i][j[0]][j[1]]) for j in mask),list((img[i+1][j[0]][j[1]]) for j in mask))
+        if i%5==0:
             mask = gen_hashmask(img[1].shape[0], img[1].shape[1], similar, mask)
         hists.append(sample_img)
         simi.append(simis)
-        # cv2.imshow('input', img[i])
-        # cv2.waitKey(1)
-        # cv2.circle(img[i], (center_x, center_y), 20, red, -1)
-        # show_img = list((img[i].flat[j]) for j in mask)
-    hists.append(list((img[i + 1].flat[j]) for j in mask))
+
+        imgs = np.zeros([img[1].shape[0], img[1].shape[1]], np.uint8)
+        for j in mask:
+            imgs[j[0]][j[1]]=255
+
+        cv2.imshow('input', imgs)
+        cv2.imshow('2', img[i])
+        cv2.waitKey(10)
+    hists.append(list((img[-1][j[0]][j[1]]) for j in mask))
     return  hists,simi
+def random_2d_sample(w,h,m):
+    mask=[]
+    for i in range(m):
+            mask.append([random.randint(0, w-1),random.randint(0,h-1)])
+    return mask
 
-
-def gen_hashmask(w, h, similar, mask):
+def gen_hashmask(h,w, similar, mask):
     number=len(mask)
     mask_new=[]
-    a=w*h
+    # for i in range(int(len(mask)/5)):
+    #     mask_new.append([random.randint(0, h - 1), random.randint(0, w - 1)])
     out=np.argsort(-np.array(similar))
+    # out = np.argsort(np.array(similar))
     for i in out:
         mask_new.append(mask[i])
         while 1:
-            x_new=random.randint(mask[i]-5,mask[i]+5)
-            if x_new >=w*h or x_new<0:
-                pass
-            else:
+            x_new=random.randint(mask[i][0]-10,mask[i][0]+10)
+            y_new = random.randint(mask[i][1] - 10, mask[i][1] + 10)
+            if ( 0 <x_new<h) and ( 0 <y_new <w ):
                 break
-        mask_new.append(x_new)
-        x_new1 = random.randint(0, w*h-1)
-        mask_new.append(x_new1)
+        mask_new.append([x_new,y_new])
+        mask_new.append([random.randint(0, h-1),random.randint(0,w-1)])
         if len(mask_new)>=number:
             break
     return mask_new
+
+
+# def sample_refresh_hist(img,number):
+#     hists = []
+#     simi=[]
+#     mask = random.sample(range(1, img[1].shape[0]*img[1].shape[1]), number)
+#     for i in range(len(img)-1):
+#         # mask = random.sample(range(1, img[1].shape[0] * img[1].shape[1]), number)
+#         sample_img=list((img[i].flat[j]) for j in mask)
+#         similar=pix_difference(list((img[i].flat[j]) for j in mask),list((img[i+1].flat[j]) for j in mask))
+#         simis=difference(list((img[i].flat[j]) for j in mask),list((img[i+1].flat[j]) for j in mask))
+#         if i%1==0:
+#             mask = gen_hashmask(img[1].shape[0], img[1].shape[1], similar, mask)
+#         hists.append(sample_img)
+#         simi.append(simis)
+#         # cv2.imshow('input', img[i])
+#         # cv2.waitKey(1)
+#         # cv2.circle(img[i], (center_x, center_y), 20, red, -1)
+#         # show_img = list((img[i].flat[j]) for j in mask)
+#     hists.append(list((img[i + 1].flat[j]) for j in mask))
+#     return  hists,simi
+
+
+# def gen_hashmask(w, h, similar, mask):
+#     number=len(mask)
+#     mask_new=[]
+#     a=w*h
+#     out=np.argsort(-np.array(similar))
+#     for i in out:
+#         mask_new.append(mask[i])
+#         while 1:
+#             x_new=random.randint(mask[i]-5,mask[i]+5)
+#             if x_new >=w*h or x_new<0:
+#                 pass
+#             else:
+#                 break
+#         mask_new.append(x_new)
+#         x_new1 = random.randint(0, w*h-1)
+#         mask_new.append(x_new1)
+#         if len(mask_new)>=number:
+#             break
+#     return mask_new
 
 # def gen_hashmask(w, h, similar, mask):
 #     number=len(mask)
@@ -117,11 +165,6 @@ def pixel_hist(img):
     for i in range(len(img)):
         hists.append(img[i].flat)
     return  hists
-
-
-
-
-
 
 # def pattern(similars):
 #     patterns=[]
@@ -166,7 +209,7 @@ def re_detect_pattern(similars):
 
 def detect_pattern(similars,FR):
     patterns = pattern(similars)
-    for windows_len in range(2,FR):
+    for windows_len in range(2,int(FR/2)):
         staturs = 0
         for i in range(1,int(len(patterns)/windows_len)):
             a=sum(np.array(patterns[(i-1)*windows_len:i*windows_len])^np.array(patterns[i*windows_len:(i+1)*windows_len]))
@@ -176,8 +219,12 @@ def detect_pattern(similars,FR):
                 staturs=0
             if staturs>2:
                 if sum(patterns[(i - 1) * windows_len:i * windows_len])>0:
+                    print('locked the video pattern', patterns[(i - 1) * windows_len:i * windows_len])
                     return (patterns[(i - 1) * windows_len:i * windows_len])
-    return (patterns[(i-1)*windows_len:i*windows_len])
+
+
+    print('did not detect the pattern')
+    return (False)
 
 def hisogram_two_frame(frame1,frame2):
     h, w = frame1.shape[0], frame1.shape[1]
@@ -253,14 +300,25 @@ def abs_diff_images(img1,img2,type=None):
     h, w = img1.shape[0], img1.shape[1]
     diff_img=np.ones( [h, w],dtype=int)
     sum=0
+    diff_frames=[]
     for i in range(h):
         for j in range(w):
             diff_img[i][j]=abs(int(img1[i][j])-int(img2[i][j]))
+            diff_frames.append(abs(int(img1[i][j])-int(img2[i][j])))
             sum = sum + abs(int(img1[i][j]) - int(img2[i][j]))
     if type=='diff_img':
         return diff_img
-    if type == 'diff_sum':
+    if type == 'diff_video':
         return sum/h*w
+    if type == 'diff_frame':
+        diff_frame=set(diff_frames)
+        dict01 = {}
+        for item in diff_frame:
+            dict01.update({item: diff_frames.count(item)})
+        draw_one(list(dict01.values()),'test')
+
+
+
 
 def draw_hotmap(name,frame_num):
     frames=get_img(name,frame_num)
@@ -271,9 +329,9 @@ def draw_hotmap(name,frame_num):
         ax.set_title('cubehelix map')
         pyplot.show()
 
-def draw_abs_imgdiff(name,frame_num):
+def draw_abs_imgdiff(name,frame_num,type='diff_video'):
     frames=get_img(name,frame_num)
-    similars = [abs_diff_images(frames[i],frames[i+1],type='diff_sum') for i in range(len(frames)-1)]
+    similars = [abs_diff_images(frames[i],frames[i+1],type) for i in range(len(frames)-1)]
     pyplot.plot()
     x = range(0, len(similars), 1)
     pyplot.plot(x, similars)

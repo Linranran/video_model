@@ -40,7 +40,7 @@ def sample_refresh_hist(img,number):
         sample_img=list((img[i][j[0]][j[1]]) for j in mask)
         similar=pix_difference(list((img[i][j[0]][j[1]]) for j in mask),list((img[i+1][j[0]][j[1]]) for j in mask))
         simis=difference(list((img[i][j[0]][j[1]]) for j in mask),list((img[i+1][j[0]][j[1]]) for j in mask))
-        if i%1==0:
+        if i%5==0:
             mask = gen_hashmask(img[1].shape[0], img[1].shape[1], similar, mask)
         hists.append(sample_img)
         simi.append(simis)
